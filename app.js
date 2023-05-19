@@ -7,15 +7,16 @@ const cors = require("cors");
 const path = require("path");
 
 app.use(cors({
-  origin: 'https://unimak.vercel.app/',
+  origin: ["https://unimak.vercel.app/"],
   // origin: 'http://localhost:3000',
   credentials: true
 }));
 
 app.use(express.json());
 app.use(cookieParser());
-app.use("/", express.static("uploads"));
-app.use("/test", (req, res) => {
+// app.use("/", express.static("uploads"));
+app.use("/", express.static(path.join(__dirname,"./uploads")));
+app.use("/unimakdb", (req, res) => {
   res.send("Hello world!");
 });
 
