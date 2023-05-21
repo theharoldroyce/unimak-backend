@@ -69,7 +69,7 @@ router.delete(
 
       productData.images.forEach((imageUrl) => {
         const filename = imageUrl;
-        const filePath = `uploads/${filename}`;
+        const filePath = `./uploads/${filename}`;
 
         fs.unlink(filePath, (err) => {
           if (err) {
@@ -213,7 +213,7 @@ router.put(
         // Delete old images from server
         product.images.forEach((imageUrl) => {
           const filename = imageUrl;
-          const filePath = `uploads/${filename}`;
+          const filePath = `./uploads/${filename}`;
 
           fs.unlink(filePath, (err) => {
             if (err) {
