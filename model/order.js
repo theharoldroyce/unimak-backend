@@ -36,6 +36,15 @@ const orderSchema = new mongoose.Schema({
         type: Date,
         default: Date.now(),
     },
+    packedAt:{
+        type: Date,
+    },
+    InTransitAt:{
+        type: Date,
+    },
+    CanceltAt:{
+        type: Date,
+    },
     deliveredAt: {
         type: Date,
     },

@@ -100,7 +100,23 @@ router.put(
       if (!order) {
         return next(new ErrorHandler("Order not found with this id", 400));
       }
-      if (req.body.status === "Transferred to delivery partner") {
+
+      if (req.body.status === "Packed") {
+        order.packedAt = Date.now();
+        order.cart.forEach(async (o) => {
+          await updateOrder(o._id, o.qty);
+        });
+      }
+
+      if (req.body.status === "In Transit") {
+        order.InTransitAt = Date.now();
+        order.cart.forEach(async (o) => {
+          await updateOrder(o._id, o.qty);
+        });
+      }
+
+      if (req.body.status === "Cancel") {
+        order.CanceltAt = Date.now();
         order.cart.forEach(async (o) => {
           await updateOrder(o._id, o.qty);
         });
@@ -110,7 +126,7 @@ router.put(
 
       if (req.body.status === "Delivered") {
         order.deliveredAt = Date.now();
-        order.paymentInfo.status = "Succeeded";
+        order.paymentInfo.status = "Paid";
         const serviceCharge = order.totalPrice + 300;
         await updateSellerInfo(order.totalPrice - serviceCharge);
       }
@@ -856,7 +872,7 @@ router.get("/tdf-current-day", async (req, res, next) => {
 
     const countCTD = await Order.countDocuments({
       createdAt: { $gte: startOfDay, $lt: endOfDay },
-      status: "Transferred to delivery partner"
+      status: "In Transit"
     });
 
     res.status(200).json({
@@ -886,7 +902,7 @@ router.get("/tdf-previous-day", async (req, res, next) => {
 
     const countPTD = await Order.countDocuments({
       createdAt: { $gte: startOfDay, $lt: endOfDay },
-      status: "Transferred to delivery partner"
+      status: "In Transit"
     });
 
     res.status(200).json({
@@ -916,7 +932,7 @@ router.get("/tdf-current-week", async (req, res, next) => {
 
     const countCTW = await Order.countDocuments({
       createdAt: { $gte: startOfWeek, $lt: endOfWeek },
-      status: "Transferred to delivery partner"
+      status: "In Transit"
     });
 
     res.status(200).json({
@@ -946,7 +962,7 @@ router.get("/tdf-previous-week", async (req, res, next) => {
 
     const countPTW = await Order.countDocuments({
       createdAt: { $gte: startOfWeek, $lt: endOfWeek },
-      status: "Transferred to delivery partner"
+      status: "In Transit"
     });
 
     res.status(200).json({
@@ -974,7 +990,7 @@ router.get("/tdf-current-month", async (req, res, next) => {
     );
     const countCTM = await Order.countDocuments({
       createdAt: { $gte: startOfMonth, $lt: endOfMonth },
-      status: "Transferred to delivery partner"
+      status: "In Transit"
     });
 
     res.status(200).json({
@@ -1001,12 +1017,42 @@ router.get("/tdf-previous-month", async (req, res, next) => {
       1
     ); const countPTM = await Order.countDocuments({
       createdAt: { $gte: startOfMonth, $lt: endOfMonth },
-      status: "Transferred to delivery partner"
+      status: "In Transit"
     });
 
     res.status(200).json({
       success: true,
       countPTM,
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+
+// Count orders for the current day with status "Cancel"
+router.get("/tdf-current-day", async (req, res, next) => {
+  try {
+    const currentDate = new Date();
+    const startOfDay = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      currentDate.getDate()
+    );
+    const endOfDay = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      currentDate.getDate() + 1
+    );
+
+    const countCTD = await Order.countDocuments({
+      createdAt: { $gte: startOfDay, $lt: endOfDay },
+      status: "In Transit"
+    });
+
+    res.status(200).json({
+      success: true,
+      countCTD,
     });
   } catch (error) {
     return next(error);
