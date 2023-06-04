@@ -7,8 +7,8 @@ const cors = require("cors");
 const path = require("path");
 
 app.use(cors({
-  origin: 'https://unimak.vercel.app',
-  // origin: 'http://localhost:3000',
+  // origin: 'https://unimak.vercel.app',
+  origin: 'http://localhost:3000',
   credentials: true
 }));
 
