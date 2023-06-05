@@ -85,7 +85,7 @@ router.post(
       if (!newUser) {
         return next(new ErrorHandler("Invalid token", 400));
       }
-      const { name, email, password, avatar } = newUser;
+      const { name, email, phoneNumber, password, avatar } = newUser;
 
       let user = await User.findOne({ email });
 
@@ -95,6 +95,7 @@ router.post(
       user = await User.create({
         name,
         email,
+        phoneNumber,
         avatar,
         password,
       });
