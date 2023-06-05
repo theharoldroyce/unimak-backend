@@ -19,6 +19,8 @@ const userSchema = new mongoose.Schema({
   },
   phoneNumber: {
     type: Number,
+    required: [true, "Please enter your Contact number"],
+    minLength: [11, "Password should be 11 digits"],
   },
   addresses: [
     {
@@ -32,6 +34,9 @@ const userSchema = new mongoose.Schema({
         type: String,
       },
       address2: {
+        type: String,
+      },
+      address3: {
         type: String,
       },
       zipCode: {
