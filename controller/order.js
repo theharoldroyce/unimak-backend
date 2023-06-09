@@ -186,6 +186,63 @@ router.put(
   })
 );
 
+// router.put(
+//   "/order-cancel/:id",
+//   catchAsyncErrors(async (req, res, next) => {
+//     try {
+//       const order = await Order.findById(req.params.id);
+
+//       if (!order) {
+//         return next(new ErrorHandler("Order not found with this id", 400));
+//       }
+
+//       order.status = "Cancelled Order"; // I-update ang status ng order bilang "cancelled"
+
+//       await order.save({ validateBeforeSave: false });
+
+//       res.status(200).json({
+//         success: true,
+//         order,
+//         message: "Order Cancelled successfully!",
+//       });
+//     } catch (error) {
+//       return next(new ErrorHandler(error.message, 500));
+//     }
+//   })
+// );
+
+router.put(
+  "/order-cancel/:id",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const order = await Order.findById(req.params.id);
+
+      if (!order) {
+        return next(new ErrorHandler("Order not found with this id", 400));
+      }
+
+      if (order.status === "Packed") {
+        return next(new ErrorHandler("Cannot cancel a order", 400));
+      }
+
+      if (order.status === "Processing") {
+        order.status = "Cancelled Order";
+        await order.save({ validateBeforeSave: false });
+
+        res.status(200).json({
+          success: true,
+          order,
+          message: "Order cancelled successfully!",
+        });
+      } else {
+        return next(new ErrorHandler("Cannot cancel an order", 400));
+      }
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
 // accept the refund ---- seller
 router.put(
   "/order-refund-success/:id",
