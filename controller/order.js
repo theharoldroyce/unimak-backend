@@ -90,6 +90,7 @@ router.get(
 );
 
 // update order status for seller
+
 router.put(
   "/update-order-status/:id",
   isSeller,
@@ -110,16 +111,10 @@ router.put(
 
       if (req.body.status === "In Transit") {
         order.InTransitAt = Date.now();
-        order.cart.forEach(async (o) => {
-          await updateOrder(o._id, o.qty);
-        });
       }
 
       if (req.body.status === "Cancel") {
         order.CanceltAt = Date.now();
-        order.cart.forEach(async (o) => {
-          await updateOrder(o._id, o.qty);
-        });
       }
 
       order.status = req.body.status;
@@ -141,8 +136,10 @@ router.put(
       async function updateOrder(id, qty) {
         const product = await Product.findById(id);
 
-        product.stock -= qty;
-        product.sold_out += qty;
+        if (req.body.status === "Packed") {
+          product.stock -= qty;
+          product.sold_out += qty;
+        }
 
         await product.save({ validateBeforeSave: false });
       }
@@ -159,6 +156,78 @@ router.put(
     }
   })
 );
+
+
+
+// router.put(
+//   "/update-order-status/:id",
+//   isSeller,
+//   catchAsyncErrors(async (req, res, next) => {
+//     try {
+//       const order = await Order.findById(req.params.id);
+
+//       if (!order) {
+//         return next(new ErrorHandler("Order not found with this id", 400));
+//       }
+
+//       if (req.body.status === "Packed") {
+//         order.packedAt = Date.now();
+//         order.cart.forEach(async (o) => {
+//           await updateOrder(o._id, o.qty);
+//         });
+//       }
+
+//       if (req.body.status === "In Transit") {
+//         order.InTransitAt = Date.now();
+//         order.cart.forEach(async (o) => {
+//           await updateOrder(o._id, o.qty);
+//         });
+//       }
+
+//       if (req.body.status === "Cancel") {
+//         order.CanceltAt = Date.now();
+//         order.cart.forEach(async (o) => {
+//           await updateOrder(o._id, o.qty);
+//         });
+//       }
+
+//       order.status = req.body.status;
+
+//       if (req.body.status === "Delivered") {
+//         order.deliveredAt = Date.now();
+//         order.paymentInfo.status = "Paid";
+//         const serviceCharge = order.totalPrice + 300;
+//         await updateSellerInfo(order.totalPrice - serviceCharge);
+//       }
+
+//       await order.save({ validateBeforeSave: false });
+
+//       res.status(200).json({
+//         success: true,
+//         order,
+//       });
+
+//       async function updateOrder(id, qty) {
+//         const product = await Product.findById(id);
+
+//         product.stock -= qty;
+//         product.sold_out += qty;
+
+//         await product.save({ validateBeforeSave: false });
+//       }
+
+//       async function updateSellerInfo(amount) {
+//         const seller = await Shop.findById(req.seller.id);
+
+//         seller.availableBalance = amount;
+
+//         await seller.save();
+//       }
+//     } catch (error) {
+//       return next(new ErrorHandler(error.message, 500));
+//     }
+//   })
+// );
 
 // give a refund ----- user
 router.put(
